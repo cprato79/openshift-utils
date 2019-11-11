@@ -1,8 +1,11 @@
 ---
 - hosts: masters
+  gather_facts: yes #IMPORTANT
   vars:
     docker_config_home: $HOME/.docker
     aws_config_home: $HOME/.aws
+  roles:
+    - epel-repository
   tasks:
   - name: Install pip
     yum:
@@ -32,6 +35,8 @@
       mode: 0755
   - name: Execute AWS ECR login and configure secrets on Openshift
     shell: $HOME/oc_secrets.sh > $HOME/aws-creds-oc-"$(date +%F-%H%M%S)".log 2>&1
+    args:
+      creates: $HOME/oc_secrets.sh 
   - cron:
       name: Docker login on AWS ECR and secrets on Openshift every 12h (two attempts)
       minute: 1,10
